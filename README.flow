@@ -1,0 +1,98 @@
+Anatomy of a test suite run
+
+PREP
+
+First, each prep script in the 'prep' phase described in your
+top level config.py is run on the hosts specified for it,
+with the interpreter specified (or with no interpreter,
+if 'execute' is set to '')
+
+Things that could happen in this phase are:
+  - setting the locale on the containers to C instead of whatever
+    funny language you have on your laptop (yes I do this)
+  - setting the timezone in your containers to match the
+    tz of your test suite launch host, so that comparisons
+    of file timestamps work
+  - any other things that need to be done only once at the
+    beginning of the whole suite
+
+FOR EACH JOB
+
+The follwing are done for each job in the test suite.
+
+Data
+
+Every file specified in the 'data' section in your
+top level config.py is copied into place on the hosts
+specified for it and in the location specified, untarring
+also if specified.
+
+Mods
+
+Every script listed in the 'mods' section in the config.py
+file in the directory for that job is copied to the remote
+hosts listed in the location specified and is then run
+using the interpreter specified or without an interpreter
+if 'execute' is set to ''.
+
+Main
+
+Each script in the 'main' section in the config.py file
+in the directory for that job file is patched, if a patch
+is specified for the script, copied to the remote hosts
+specified and in the location specified, and then run
+from there with the desired inerpreter, or with no interpreter
+if 'execute' is set to ''.
+
+Collect
+
+The output results from the test job are collected by running each
+script listed in the 'collect' section of the config.py script
+for that job on the hosts specified and with the interpreter
+specified, or with no interpreter if 'execute' is set to ''.
+No arguments are passed to the script.
+
+If the script produces output that needs to be checked later
+by the verify script, the attribute 'results' should give the
+full path to the file on the remote host that will contain that
+output.
+
+In this case the results file will be copied back to the
+local host in jobs/<jobname>/tmp/results_<hostname>  and the verify
+script(s) shoul
+
+Verify
+
+Then the collected output results are checked by running each
+script specified in the 'verify' section of the config.py script
+for that job on the hosts specified and with the interpreter
+specified, or with no interpreter if 'execute' is set to ''.
+
+The script will be run on the test suite launch host if the
+attribute 'remote' is not present or is set to None.
+Otherwise it will have been copied to the location specified
+on the specified hosts and will be run from there.
+
+Output  comparison of collcted output results, and any other
+functionality needed to verify that the output is as expected,
+must be handled entirely by the verify scripts.  No post-processing
+is provided, no extra hooks or anything else.
+
+Note that this means you need to find the job name
+from the full path of the verify script being invoked, as it
+will be called tests/job/<jobname>/verify/<scriptname>
+You need this in order to find the per host results files
+described in the 'collect' phase.
+
+CLEANUP
+
+This is done after all test jobs in the suite have run and been
+checked.
+
+Each script in the 'cleanup' phase described in your
+top level config.py is run on the hosts specified for it,
+with the interpreter specified (or with no interpreter,
+if 'execute' is set to '')
+
+In general, here you want to undo the changes you made in the prep
+phase.

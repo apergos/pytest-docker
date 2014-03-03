@@ -1,0 +1,71 @@
+This mini test platform relies on Docker containers to get work
+done.  It could use something else, if for example you wanted
+to set up multiple vms with the appropriate hostnames and
+entries in /etc/hosts on the system from which the testbed
+will be launched.
+
+How to get going with Docker containers
+
+You should get a copy of the devenviron repo from
+http://www.github.com/apergos/...
+
+Cd into the repo, run ./build-dev-base.sh to build the base image
+ariel/dev:base which you will customize for testing purposes.
+
+Create a Dockerfile which builds an image on top of that with
+the programs and configuration you will need for your test hosts.
+Bear in mind that test data and scripts will b copied over
+during the test phases so you should not add those in the
+Dockerfile.  See Dockerfile.testimage.example for a sample.
+
+Build your test image from that Dockerfile:
+docker build -rm -t <your-name-here>/<name-of-test-suite> .
+
+Set up a script for creating the containers from that image
+if there are several; you may want to revisit your test
+suite in the future and this will save you some headscratching
+later.  The commands in the script for creating containers
+look like this:
+docker run -d -name <hostname-here> -v /sys/fs/selinux:/selinux:ro name-of-test-image:latest
+
+Note that the hostname you provide here is actually a docker container tag;
+docker creates containers with hostnames that are a random string of hex digits.
+The container will have its hostname set to the tag when the test suite runs.
+
+If you reuse these containers you can stop and start them manually by
+docker start hostname
+and
+docker stop hostname
+
+If you are done with your test suite forever or just need to reclaim
+space or move the whole thing elsewhere, you can remove the docker
+containers by
+docker rm container-name
+and you can remove the test image or any other image by
+docker rmi image-name
+
+In order to run your test suite, the containers must be running and you
+should add their ips and container names to your local /etc/hosts; you
+can do this by running
+python setup-etc-hosts.py hostname1,hostname2,...
+You must do this every time the containers are started up.
+
+Once you've set up the etc hosts file on the local host from which
+the test suite will be launched, you can of course ssh into the various
+containers using their container names for hostnames.
+
+When you are done testing and before shutting down or removing
+the containers, you should remove those entries from /etc/hosts by
+python setup-etc-hosts.py --clean hostname1,hostname2,...
+This removes only the host ips corresponsing to the specific running
+containers.
+
+If you forget to do this and shut down or remove the containers, you won't be able
+to remove the entries from /etc/hosts the nice way, so you can either
+remove *all* entries added by setup-etc-hosts.py for those containers by
+python setup-etc-hosts.py --cleanall hostname1,hostname2,...
+or of course you can edit the file by hand.
+
+
+
+

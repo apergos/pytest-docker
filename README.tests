@@ -1,0 +1,29 @@
+Setting up your data and scripts for testing
+
+Set up a subdirectory 'tests' with the following in it:
+
+prep      -- this will contain all scripts to be run on hosts
+             ahead of the tests
+data      -- this will contain all files and data that should
+             be put into place on the hosts where the tests
+             will be run
+
+jobs      -- for each phase of the tests, this will contain a
+             subdirctory with th directories 'mods' containing
+             scripts that alter data or make changes on the hosts
+             before the test phase run, and 'patches' which will
+             be applied to the scripts to be tested
+
+             it will also contain a config.py file describing
+             the mods... meh...
+
+main      -- this will contain the scripts or programs that are to
+             be tested
+
+tmp       -- scratch area (do we need to create ahead of time?)
+
+verify    -- this will contain all scripts that collect and
+             check test output from the hosts
+
+cleanup   -- this will contain all scripts to be run on hosts
+             after tests have run and results have been checked
